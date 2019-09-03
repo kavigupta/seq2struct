@@ -155,6 +155,10 @@ class SpiderDataset(torch.utils.data.Dataset):
             self.results.append(self.evaluator.evaluate_one(
                 item.schema.db_id, item.orig['query'], inferred_code))
 
+        def add_all(self, item, inferred_codes):
+            self.results.append([self.evaluator.evaluate_one(
+                item.schema.db_id, item.orig['query'], inferred_code) for inferred_code in inferred_codes])
+
         def finalize(self):
             self.evaluator.finalize()
             return {

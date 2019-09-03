@@ -6,7 +6,7 @@ import _jsonnet
 from seq2struct import datasets
 from seq2struct.utils import registry
 
-def compute_metrics(config_path, config_args, section, inferred_path,logdir=None):
+def compute_metrics(config_path, config_args, section, inferred_path, logdir=None, evaluate_beams_individually=True):
     if config_args:
         config = json.loads(_jsonnet.evaluate_file(config_path, tla_codes={'args': config_args}))
     else:
@@ -29,13 +29,16 @@ def compute_metrics(config_path, config_args, section, inferred_path,logdir=None
 
     for line in inferred_lines:
         infer_results = json.loads(line)
-        if infer_results['beams']:
-            inferred_code = infer_results['beams'][0]['inferred_code']
+        if evaluate_beams_individually:
+            metrics.add_all(data[infer_results['index']], [beam['inferred_code'] for beam in infer_results['beams']])
         else:
-            inferred_code = None
-        if 'index' in infer_results:
-            metrics.add(data[infer_results['index']], inferred_code)
-        else:
-            metrics.add(None, inferred_code, obsolete_gold_code=infer_results['gold_code'])
+            if infer_results['beams']:
+                inferred_code = infer_results['beams'][0]['inferred_code']
+            else:
+                inferred_code = None
+            if 'index' in infer_results:
+                metrics.add(data[infer_results['index']], inferred_code)
+            else:
+                metrics.add(None, inferred_code, obsolete_gold_code=infer_results['gold_code'])
 
     return logdir, metrics.finalize()
