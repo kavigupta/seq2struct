@@ -1,5 +1,6 @@
 import json
 import os
+import tqdm
 
 import _jsonnet
 
@@ -27,10 +28,13 @@ def compute_metrics(config_path, config_args, section, inferred_path, logdir=Non
           len(data)))
 
 
-    for line in inferred_lines:
+    for line in tqdm.tqdm(inferred_lines):
         infer_results = json.loads(line)
+        if 'beams' not in infer_results:
+            assert 'error' in infer_results
+            continue
         if evaluate_beams_individually:
-            metrics.add_all(data[infer_results['index']], [beam['inferred_code'] for beam in infer_results['beams']])
+            metrics.add_all(infer_results['index'], data[infer_results['index']], [beam['inferred_code'] for beam in infer_results['beams']])
         else:
             if infer_results['beams']:
                 inferred_code = infer_results['beams'][0]['inferred_code']
