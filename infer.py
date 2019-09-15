@@ -103,7 +103,7 @@ class Inferer:
                 asyncs = [pool.apply_async(self._infer_batch, args=param) for param in params]
                 res = [y for x in asyncs for y in x.get()]
         else:
-            res = [self._infer_batch(*param) for param in params]
+            res = [y for param in params for y in self._infer_batch(*param)]
 
         for item in res:
             output.write(item)
