@@ -31,6 +31,9 @@ def compute_metrics(config_path, config_args, section, inferred_path,logdir=None
         infer_results = json.loads(line)
         if infer_results['beams']:
             inferred_code = infer_results['beams'][0]['inferred_code']
+        if 'beams' not in infer_results:
+            assert 'error' in infer_results
+            continue
         else:
             inferred_code = None
         if 'index' in infer_results:
