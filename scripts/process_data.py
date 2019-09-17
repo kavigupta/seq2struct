@@ -15,19 +15,25 @@ import pickle
 from seq2struct.models.match_model import MatchModel
 from tqdm import tqdm as tqdm
 
-with open('data/spider-20190205/dev_augmented.json') as f:
+DATA_JSON = 'data/spider-20190205/dev_augmented.json'
+INFERRED_JSONL = expanduser("~/results/inferred_augmented")
+EVAL_JSON = expanduser("~/results/eval_augmented")
+MATCH_MODEL_CHECKPOINT_DIR = "/home/kavigupta/results/matching-model-checkpoints"
+OUTPUT_PICKLE = expanduser("~/results/full-data.pkl")
+
+with open(DATA_JSON) as f:
     augmented_data = json.load(f)
 
-with open(expanduser("~/results/inferred_augmented")) as f:
+with open(INFERRED_JSONL) as f:
     infer_augmented_result = [json.loads(line) for line in tqdm(list(f))]
 
-with open(expanduser("~/results/eval_augmented")) as f:
+with open(EVAL_JSON) as f:
     eval_augmented_result = json.load(f)
 
 print("read all results")
     
 by_sql_humanwording_and_compwording = defaultdict(lambda: defaultdict(dict))
-match_model = MatchModel("/home/kavigupta/results/matching-model-checkpoints",
+match_model = MatchModel(MATCH_MODEL_CHECKPOINT_DIR,
                   1, 1, 100)
 
 index_map = {}
@@ -78,5 +84,5 @@ by_sql_humanwording_and_compwording_dict = {
     for q in by_sql_humanwording_and_compwording
 }
 
-with open(expanduser("~/results/full-data.pkl"), "wb") as f:
+with open(OUTPUT_PICKLE, "wb") as f:
     pickle.dump(by_sql_humanwording_and_compwording_dict, f)
